@@ -1,0 +1,102 @@
+<h1 class="aa-page-title">Recording <%= @recording.uuid %></h1>
+
+<div class="aa-panel aa-metadata">
+  <dl class="aa-metadata__list">
+    <div>
+      <dt>Started</dt>
+      <dd><%= @recording.started_at.strftime("%Y-%m-%d %H:%M:%S") %></dd>
+    </div>
+    <div>
+      <dt>Duration</dt>
+      <dd><%= render "duration", ms: @recording.duration_ms %></dd>
+    </div>
+    <div>
+      <dt>Device</dt>
+      <dd><span class="aa-badge aa-badge--device"><%= @recording.device %></span></dd>
+    </div>
+    <div>
+      <dt>Viewport</dt>
+      <dd><%= @recording.viewport_width %> &times; <%= @recording.viewport_height %></dd>
+    </div>
+    <div>
+      <dt>Referrer</dt>
+      <dd><%= @recording.referrer.presence || "—" %></dd>
+    </div>
+    <div>
+      <dt>User agent</dt>
+      <dd class="aa-truncate" title="<%= @recording.user_agent %>">
+        <%= truncate(@recording.user_agent.to_s, length: 80) %>
+      </dd>
+    </div>
+    <div>
+      <dt>Frustration</dt>
+      <dd><%= render "frustration_badge", score: @recording.frustration_score %></dd>
+    </div>
+  </dl>
+
+  <div class="aa-metadata__actions">
+    <%= button_to "Run analysis", analyze_recording_path(@recording), method: :post,
+          class: "aa-btn aa-btn--primary" %>
+    <%= button_to "Delete recording", recording_path(@recording), method: :delete,
+          class: "aa-btn aa-btn--danger",
+          form: { data: { turbo_confirm: "Delete this recording?" } } %>
+  </div>
+</div>
+
+<% if @summary %>
+  <div class="aa-panel aa-summary">
+    <h2 class="aa-summary__title">AI summary</h2>
+    <p class="aa-summary__body"><%= @summary.body %></p>
+  </div>
+<% end %>
+
+<div class="aa-columns">
+  <div class="aa-panel aa-page-trail">
+    <h2>Page trail</h2>
+    <% if @pages.empty? %>
+      <p class="aa-empty">No pages recorded.</p>
+    <% else %>
+      <ol>
+        <% @pages.each do |url| %>
+          <li class="aa-truncate" title="<%= url %>"><%= truncate(url.to_s, length: 60) %></li>
+        <% end %>
+      </ol>
+    <% end %>
+  </div>
+
+  <div class="aa-panel aa-insights">
+    <h2>Insights</h2>
+    <% if @insights.reject { |i| i.kind == "summary" }.empty? %>
+      <p class="aa-empty">No insights yet. Run analysis to detect frustration signals.</p>
+    <% else %>
+      <ul class="aa-insight-list">
+        <% @insights.each do |insight| %>
+          <% next if insight.kind == "summary" %>
+          <li class="aa-insight aa-insight--<%= insight.severity %>">
+            <span class="aa-badge aa-badge--<%= insight.severity %>"><%= insight.kind.humanize %></span>
+            <% if insight.ts_ms %>
+              <button type="button" class="aa-insight__ts" onclick="window.AAPlayer && window.AAPlayer.seek(<%= insight.ts_ms %>)">
+                <%= render "duration", ms: insight.ts_ms %>
+              </button>
+            <% end %>
+            <span class="aa-insight__body"><%= insight.body %></span>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+  </div>
+</div>
+
+<div class="aa-panel aa-player-panel">
+  <h2>Replay</h2>
+  <div id="aa-player"></div>
+</div>
+
+<script>
+  window.ActiveAnalyticsReplay = {
+    eventsUrl: <%= raw events_recording_path(@recording).to_json %>,
+    markers: <%= raw @insights.select { |i| i.ts_ms }.map { |i| { ts_ms: i.ts_ms, kind: i.kind, severity: i.severity } }.to_json %>
+  };
+</script>
+<%= javascript_include_tag "active_analytics/dom_builder", defer: true %>
+<%= javascript_include_tag "active_analytics/player", defer: true %>

@@ -1,0 +1,5 @@
+Rails.application.routes.draw do
+  mount ActiveAnalytics::Engine => "/analytics"
+
+  root "home#index"
+end

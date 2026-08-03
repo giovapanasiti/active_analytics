@@ -1,0 +1,91 @@
+<h1 class="aa-page-title">Recordings</h1>
+
+<%= form_with url: recordings_path, method: :get, local: true, class: "aa-filter-form" do |f| %>
+  <div class="aa-filter-row">
+    <div class="aa-filter-field">
+      <%= f.label :q, "Search URL" %>
+      <%= f.text_field :q, value: params[:q], placeholder: "/checkout" %>
+    </div>
+
+    <div class="aa-filter-field">
+      <%= f.label :min_duration, "Min duration (s)" %>
+      <%= f.number_field :min_duration, value: params[:min_duration], min: 0 %>
+    </div>
+
+    <div class="aa-filter-field">
+      <%= f.label :from, "From" %>
+      <%= f.date_field :from, value: params[:from] %>
+    </div>
+
+    <div class="aa-filter-field">
+      <%= f.label :to, "To" %>
+      <%= f.date_field :to, value: params[:to] %>
+    </div>
+
+    <div class="aa-filter-field aa-filter-field--checkbox">
+      <label>
+        <%= check_box_tag :errors, "1", params[:errors] == "1" %>
+        Errors only
+      </label>
+    </div>
+
+    <div class="aa-filter-field aa-filter-field--submit">
+      <%= f.submit "Filter", class: "aa-btn aa-btn--primary" %>
+      <%= link_to "Reset", recordings_path, class: "aa-btn" %>
+    </div>
+  </div>
+<% end %>
+
+<% if @recordings.empty? %>
+  <p class="aa-empty">No recordings match your filters.</p>
+<% else %>
+  <table class="aa-table">
+    <thead>
+      <tr>
+        <th>Started</th>
+        <th>First URL</th>
+        <th>Device</th>
+        <th>Duration</th>
+        <th>Pages</th>
+        <th>Clicks</th>
+        <th>Errors</th>
+        <th>Frustration</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @recordings.each do |recording| %>
+        <tr>
+          <td><%= recording.started_at.strftime("%Y-%m-%d %H:%M") %></td>
+          <td class="aa-truncate" title="<%= recording.first_url %>">
+            <%= truncate(recording.first_url.to_s, length: 60) %>
+          </td>
+          <td><span class="aa-badge aa-badge--device"><%= recording.device %></span></td>
+          <td><%= render "duration", ms: recording.duration_ms %></td>
+          <td><%= recording.pages_count %></td>
+          <td><%= recording.clicks_count %></td>
+          <td class="<%= "aa-text-danger" if recording.errors_count.to_i > 0 %>">
+            <%= recording.errors_count %>
+          </td>
+          <td><%= render "frustration_badge", score: recording.frustration_score %></td>
+          <td class="aa-table__actions">
+            <%= link_to "View", recording_path(recording), class: "aa-btn aa-btn--small" %>
+            <%= button_to "Delete", recording_path(recording), method: :delete,
+                  class: "aa-btn aa-btn--small aa-btn--danger",
+                  form: { data: { turbo_confirm: "Delete this recording?" } } %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <div class="aa-pagination">
+    <% if @has_prev %>
+      <%= link_to "Previous", recordings_path(request.query_parameters.merge(page: @page - 1)), class: "aa-btn" %>
+    <% end %>
+    <span class="aa-pagination__page">Page <%= @page %></span>
+    <% if @has_next %>
+      <%= link_to "Next", recordings_path(request.query_parameters.merge(page: @page + 1)), class: "aa-btn" %>
+    <% end %>
+  </div>
+<% end %>

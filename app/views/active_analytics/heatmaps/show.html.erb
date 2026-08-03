@@ -1,0 +1,42 @@
+<h1 class="aa-page-title">Heatmap: <%= @path %></h1>
+
+<div class="aa-panel aa-heatmap-panel">
+  <div class="aa-heatmap-selectors">
+    <div class="aa-heatmap__pills">
+      <% %w[move click scroll].each do |kind| %>
+        <%= link_to kind.capitalize, show_heatmaps_path(path: @path, device: @device, kind: kind),
+              class: "aa-heatmap__pill#{ " aa-heatmap__pill--active" if @kind == kind }" %>
+      <% end %>
+    </div>
+
+    <div class="aa-heatmap__pills">
+      <% %w[desktop tablet mobile].each do |device| %>
+        <%= link_to device.capitalize, show_heatmaps_path(path: @path, device: device, kind: @kind),
+              class: "aa-heatmap__pill#{ " aa-heatmap__pill--active" if @device == device }" %>
+      <% end %>
+    </div>
+  </div>
+
+  <p class="aa-heatmap-meta">
+    <%= @total_pageviews %> pageviews &middot; <%= @total_points %> move/click points recorded.
+    <% if @reference_recording %>
+      Backdrop from recording <%= @reference_recording.uuid %>.
+    <% else %>
+      No snapshot available for this page — the heatmap is rendered on a blank backdrop.
+    <% end %>
+  </p>
+
+  <div id="aa-heatmap"></div>
+</div>
+
+<script>
+  window.ActiveAnalyticsHeatmap = {
+    dataUrl: <%= raw data_heatmaps_path(path: @path, device: @device, kind: @kind).to_json %>,
+    eventsUrl: <%= raw(@reference_recording ? events_recording_path(@reference_recording).to_json : "null") %>,
+    path: <%= raw @path.to_json %>,
+    viewportWidth: <%= @reference_recording&.viewport_width || 1280 %>,
+    viewportHeight: <%= @reference_recording&.viewport_height || 800 %>
+  };
+</script>
+<%= javascript_include_tag "active_analytics/dom_builder", defer: true %>
+<%= javascript_include_tag "active_analytics/heatmap", defer: true %>

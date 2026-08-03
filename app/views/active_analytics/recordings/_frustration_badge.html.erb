@@ -1,0 +1,13 @@
+<%
+  level = if score.nil?
+    "unknown"
+  elsif score >= 60
+    "critical"
+  elsif score >= 30
+    "warning"
+  else
+    "ok"
+  end
+  label = score.nil? ? "—" : score.to_s
+%>
+<span class="aa-badge aa-badge--<%= level %>"><%= label %></span>

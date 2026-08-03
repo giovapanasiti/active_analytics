@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ActiveAnalytics</title>
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+
+  <%= yield :head %>
+
+  <%= stylesheet_link_tag "active_analytics/application", media: "all" %>
+</head>
+<body>
+  <header class="aa-topbar">
+    <div class="aa-container aa-topbar__inner">
+      <%= link_to "ActiveAnalytics", root_path, class: "aa-topbar__brand" %>
+      <nav class="aa-topbar__nav">
+        <%= link_to "Overview", stats_path, class: "aa-topbar__link" %>
+        <%= link_to "Recordings", recordings_path, class: "aa-topbar__link" %>
+        <%= link_to "Heatmaps", heatmaps_path, class: "aa-topbar__link" %>
+      </nav>
+    </div>
+  </header>
+
+  <main class="aa-container">
+    <% if notice.present? %>
+      <div class="aa-flash aa-flash--notice"><%= notice %></div>
+    <% end %>
+    <% if alert.present? %>
+      <div class="aa-flash aa-flash--alert"><%= alert %></div>
+    <% end %>
+
+    <%= yield %>
+  </main>
+</body>
+</html>
+

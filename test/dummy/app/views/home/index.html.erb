@@ -1,0 +1,52 @@
+<h1>ActiveAnalytics Demo</h1>
+
+<p>This dummy page exists to exercise the ActiveAnalytics session recorder during
+development: it mounts a form with sensitive fields, a masked block, and a button
+that mutates the DOM so recordings capture snapshots, inputs, and mutations alike.</p>
+
+<p>Open the dashboard at <%= link_to "/analytics", "/analytics" %> after interacting with
+this page to replay the recorded session.</p>
+
+<form>
+  <div>
+    <label for="name">Name</label>
+    <input type="text" id="name" name="name" data-aa-unmask>
+  </div>
+
+  <div>
+    <label for="email">Email</label>
+    <input type="email" id="email" name="email">
+  </div>
+
+  <div>
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password">
+  </div>
+
+  <div>
+    <label for="message">Message</label>
+    <textarea id="message" name="message" placeholder="Tell us something"></textarea>
+  </div>
+
+  <button type="submit">Send</button>
+</form>
+
+<div data-aa-mask>
+  <h2>Shipping address</h2>
+  <p>123 Rivergate Lane, Springfield, ST 00000</p>
+</div>
+
+<div>
+  <button id="add-item-button" type="button">Add list item</button>
+  <ul id="item-list">
+    <li>Initial item</li>
+  </ul>
+</div>
+
+<script>
+  document.getElementById("add-item-button").addEventListener("click", function () {
+    var item = document.createElement("li");
+    item.textContent = "Added item " + document.getElementById("item-list").children.length;
+    document.getElementById("item-list").appendChild(item);
+  });
+</script>

@@ -1,0 +1,35 @@
+<h1 class="aa-page-title">Heatmaps</h1>
+
+<% if @pages.empty? %>
+  <p class="aa-empty">No heatmap data has been aggregated yet.</p>
+<% else %>
+  <table class="aa-table">
+    <thead>
+      <tr>
+        <th>Page</th>
+        <th>Desktop</th>
+        <th>Tablet</th>
+        <th>Mobile</th>
+        <th>Total points</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @pages.each do |page| %>
+        <tr>
+          <td class="aa-truncate" title="<%= page[:path] %>"><%= truncate(page[:path].to_s, length: 60) %></td>
+          <% %w[desktop tablet mobile].each do |device| %>
+            <% count = page[:pageviews][device] %>
+            <td>
+              <% if count.to_i > 0 %>
+                <%= link_to count, show_heatmaps_path(path: page[:path], device: device) %>
+              <% else %>
+                <span class="aa-text-muted">0</span>
+              <% end %>
+            </td>
+          <% end %>
+          <td><%= page[:points] %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

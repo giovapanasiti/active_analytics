@@ -1,0 +1,129 @@
+<h1 class="aa-page-title">Overview</h1>
+
+<div class="aa-heatmap__pills aa-stats-range">
+  <% [ 7, 30, 90 ].each do |option| %>
+    <%= link_to "#{option} days", stats_path(days: option),
+          class: "aa-heatmap__pill#{ " aa-heatmap__pill--active" if @days == option }" %>
+  <% end %>
+</div>
+
+<div class="aa-stats-cards">
+  <div class="aa-stats-card">
+    <div class="aa-stats-card__label">Page views</div>
+    <div class="aa-stats-card__value"><%= number_with_delimiter(@total_views) %></div>
+  </div>
+  <div class="aa-stats-card">
+    <div class="aa-stats-card__label">Unique visitors</div>
+    <div class="aa-stats-card__value"><%= number_with_delimiter(@total_uniques) %></div>
+  </div>
+  <div class="aa-stats-card">
+    <div class="aa-stats-card__label">Views per visitor</div>
+    <div class="aa-stats-card__value">
+      <%= @views_per_visitor ? number_with_precision(@views_per_visitor, precision: 1) : "—" %>
+    </div>
+  </div>
+</div>
+
+<div class="aa-panel aa-stats-chart-wrap">
+  <%= stats_chart(@series) %>
+</div>
+
+<div class="aa-stats-tables">
+  <div class="aa-panel">
+    <h2 class="aa-panel-title">Top pages</h2>
+    <% if @top_pages.empty? %>
+      <p class="aa-empty">No page views recorded in this range.</p>
+    <% else %>
+      <table class="aa-table">
+        <thead>
+          <tr>
+            <th>Page</th>
+            <th>Views</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @top_pages.each do |path, views| %>
+            <tr>
+              <td class="aa-truncate" title="<%= path %>"><%= truncate(path.to_s, length: 60) %></td>
+              <td><%= number_with_delimiter(views) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% end %>
+  </div>
+
+  <div class="aa-panel">
+    <h2 class="aa-panel-title">Top referrers</h2>
+    <% if @top_referrers.empty? %>
+      <p class="aa-empty">No referrer data recorded in this range.</p>
+    <% else %>
+      <table class="aa-table">
+        <thead>
+          <tr>
+            <th>Referrer</th>
+            <th>Views</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @top_referrers.each do |host, views| %>
+            <tr>
+              <td class="aa-truncate" title="<%= host %>"><%= truncate(host.to_s, length: 60) %></td>
+              <td><%= number_with_delimiter(views) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% end %>
+  </div>
+</div>
+
+<div class="aa-stats-tables">
+  <div class="aa-panel">
+    <h2 class="aa-panel-title">Browsers</h2>
+    <% if @browsers.empty? %>
+      <p class="aa-empty">No browser data recorded in this range.</p>
+    <% else %>
+      <table class="aa-table">
+        <thead>
+          <tr>
+            <th>Browser</th>
+            <th>Views</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @browsers.each do |browser, views| %>
+            <tr>
+              <td><%= browser %></td>
+              <td><%= number_with_delimiter(views) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% end %>
+  </div>
+
+  <div class="aa-panel">
+    <h2 class="aa-panel-title">Devices</h2>
+    <% if @devices.empty? %>
+      <p class="aa-empty">No device data recorded in this range.</p>
+    <% else %>
+      <table class="aa-table">
+        <thead>
+          <tr>
+            <th>Device</th>
+            <th>Views</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @devices.each do |device, views| %>
+            <tr>
+              <td><span class="aa-badge aa-badge--device"><%= device %></span></td>
+              <td><%= number_with_delimiter(views) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% end %>
+  </div>
+</div>
