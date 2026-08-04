@@ -13,6 +13,7 @@
   <header class="aa-topbar">
     <div class="aa-container aa-topbar__inner">
       <%= link_to "ActiveAnalytics", root_path, class: "aa-topbar__brand" %>
+      <span class="aa-topbar__version">v<%= ActiveAnalytics::VERSION %></span>
       <nav class="aa-topbar__nav">
         <%= link_to "Overview", stats_path, class: "aa-topbar__link" %>
         <%= link_to "Recordings", recordings_path, class: "aa-topbar__link" %>

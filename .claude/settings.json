@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bin/rails test:*)",
+      "Bash(bin/rails test)",
+      "Bash(bin/rubocop:*)",
+      "Bash(bin/rubocop)",
+      "Bash(bundle install)",
+      "Bash(bundle exec:*)",
+      "Bash(node --check:*)",
+      "Bash(bin/rails db:migrate:*)",
+      "Bash(bin/rails db:migrate)",
+      "Bash(bin/rails runner:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)"
+    ]
+  }
+}

@@ -32,9 +32,14 @@
     this.scale = 1;
     this.dragging = false;
 
+    this.hasSnapshot = this.events.some(function (evt) {
+      return evt.e === "snapshot";
+    });
+
     this.buildUi();
     this.renderMarkers();
     this.updateStageSize();
+    if (!this.hasSnapshot) this.showNoSnapshotNotice();
     this.seek(0);
 
     var self = this;
@@ -143,6 +148,17 @@
     window.addEventListener("resize", function () {
       self5.updateStageSize();
     });
+  };
+
+  // No `snapshot` event was captured for this recording (e.g. an old
+  // recording lost to the pre-fix 64KB keepalive cap). Render an explicit
+  // notice on the blank stage; cursor/scroll events still play over it.
+  Player.prototype.showNoSnapshotNotice = function () {
+    var notice = document.createElement("div");
+    notice.className = "aa-player__no-snapshot";
+    notice.textContent = "No DOM snapshot was captured for this recording. " +
+      "Movements are shown on a blank background.";
+    this.stage.appendChild(notice);
   };
 
   Player.prototype.renderMarkers = function () {

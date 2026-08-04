@@ -88,6 +88,18 @@ a:hover {
   color: var(--aa-primary);
 }
 
+.aa-topbar__version {
+  margin-left: 8px;
+  margin-right: auto;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--aa-bg-muted, #f1f3f5);
+  color: var(--aa-text-muted, #6b7280);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
 .aa-page-title {
   font-size: 20px;
   font-weight: 600;
@@ -442,6 +454,23 @@ a:hover {
   border: 0;
   pointer-events: none;
   background: #fff;
+}
+
+.aa-player__no-snapshot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+  color: var(--aa-text-muted);
+  font-size: 13px;
+  background: var(--aa-panel-bg);
+  z-index: 3;
 }
 
 .aa-player__cursor {

@@ -355,6 +355,12 @@
       vh: window.innerHeight,
       doc: serializeNode(document.documentElement, MASK_ALL_TEXT)
     });
+
+    // Snapshots are the largest payloads by far (full DOM). Flush
+    // immediately (uncapped plain fetch, see sendPayload) rather than
+    // waiting for the 5s timer, so big payloads travel through the
+    // keepalive-free path as early as possible.
+    flush(false);
   }
 
   // ------------------------------ Event buffer -------------------------------
@@ -369,25 +375,93 @@
     if (buffer.length >= 100) flush(false);
   }
 
-  function sendPayload(body, useBeacon) {
-    try {
-      if (useBeacon && navigator.sendBeacon) {
-        var blob = new Blob([ body ], { type: "application/json" });
-        if (navigator.sendBeacon(ENDPOINT, blob)) return;
-      }
-    } catch (e) {
-      // fall through to fetch
-    }
+  // Fetch-spec keepalive request bodies (and sendBeacon payloads) are capped
+  // at 64KB by the browser; larger bodies are rejected outright and silently
+  // never sent. The seq-0 batch carries the full DOM snapshot and routinely
+  // exceeds that cap on real pages, so keepalive/beacon is only safe for
+  // small payloads. See tasks/hotjar-alternative-spec.md "Flush transport".
+  var KEEPALIVE_BODY_LIMIT = 60000;
+  var RETRY_DELAY_MS = 2000;
 
+  // On rejection (network error or a keepalive/beacon body-size cap), retry
+  // the SAME serialized payload exactly once with an uncapped plain fetch.
+  // The server dedups by [uuid, seq] (returns 204 on a repeat), so a
+  // duplicate delivery here is safe. No retry loops beyond this one attempt.
+  function retryOnce(body) {
+    setTimeout(function () {
+      try {
+        fetch(ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: body
+        }).catch(function () {
+          // best effort; drop after the single retry
+        });
+      } catch (e) {
+        // best effort; drop after the single retry
+      }
+    }, RETRY_DELAY_MS);
+  }
+
+  // Plain fetch, no keepalive: uncapped body size. Used for every
+  // interval/size-triggered flush, and as the unload-path fallback for
+  // large payloads that would be rejected by keepalive/beacon.
+  function fetchPlain(body) {
+    try {
+      fetch(ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: body
+      }).catch(function () {
+        retryOnce(body);
+      });
+    } catch (e) {
+      retryOnce(body);
+    }
+  }
+
+  // Fetch with keepalive: survives page unload but capped at 64KB. Only
+  // used on the unload path for small payloads.
+  function fetchKeepalive(body) {
     try {
       fetch(ENDPOINT, {
         method: "POST",
         keepalive: true,
         headers: { "Content-Type": "application/json" },
         body: body
+      }).catch(function () {
+        retryOnce(body);
       });
     } catch (e) {
-      // best effort; drop on failure
+      retryOnce(body);
+    }
+  }
+
+  function sendPayload(body, useBeacon) {
+    if (!useBeacon) {
+      // Interval/size-triggered flush: never on the unload path, so there is
+      // no need for keepalive/beacon here and no cap to worry about.
+      fetchPlain(body);
+      return;
+    }
+
+    // Unload path (pagehide / visibility hidden): try sendBeacon first since
+    // it best survives page teardown. sendBeacon shares the 64KB cap with
+    // keepalive fetch and returns false (rather than throwing) when the body
+    // is too large, so fall back explicitly rather than trusting it silently.
+    try {
+      if (navigator.sendBeacon) {
+        var blob = new Blob([ body ], { type: "application/json" });
+        if (navigator.sendBeacon(ENDPOINT, blob)) return;
+      }
+    } catch (e) {
+      // fall through to the fetch fallback below
+    }
+
+    if (body.length > KEEPALIVE_BODY_LIMIT) {
+      fetchPlain(body);
+    } else {
+      fetchKeepalive(body);
     }
   }
 
@@ -397,18 +471,17 @@
     var events = buffer;
     buffer = [];
 
-    var payload = { uuid: session.uuid, seq: session.seq };
-
-    if (session.seq === 0) {
-      payload.meta = {
+    var payload = {
+      uuid: session.uuid,
+      seq: session.seq,
+      meta: {
         url: location.href,
         referrer: document.referrer,
         vw: window.innerWidth,
         vh: window.innerHeight
-      };
-    }
-
-    payload.events = events;
+      },
+      events: events
+    };
 
     session.seq += 1;
     persistSession();

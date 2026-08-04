@@ -41,6 +41,31 @@ module ActiveAnalytics
       assert_equal 1, recording.event_batches.count
     end
 
+    test "first delivered batch with a non-zero seq still creates the recording from its meta" do
+      # Simulates a lost seq-0 batch (e.g. dropped by the pre-fix 64KB keepalive
+      # cap): the server sees seq 3 first for this uuid and must still create
+      # the Recording using that batch's meta, since the recorder now sends
+      # meta on every batch (not only seq 0).
+      uuid = SecureRandom.uuid
+
+      post_events(
+        uuid: uuid,
+        seq: 3,
+        meta: { url: "http://example.com/late", referrer: "http://ref.example.com", vw: 1024, vh: 768 },
+        events: [ { t: 900, e: "click", d: {} } ]
+      )
+
+      assert_response :created
+
+      recording = Recording.find_by!(uuid: uuid)
+      assert_equal "http://example.com/late", recording.first_url
+      assert_equal "http://ref.example.com", recording.referrer
+      assert_equal 1024, recording.viewport_width
+      assert_equal 768, recording.viewport_height
+      assert_equal 1, recording.event_batches.count
+      assert_equal 3, recording.event_batches.first.seq
+    end
+
     test "second post appends a batch and updates counters, last_seen_at and duration_ms" do
       uuid = SecureRandom.uuid
 

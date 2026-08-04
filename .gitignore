@@ -8,3 +8,9 @@
 /test/dummy/log/*.log
 /test/dummy/storage/
 /test/dummy/tmp/
+
+# Claude Code: personal overrides and runtime files stay local;
+# settings.json, agents/ and skills/ are shared and committed.
+/.claude/settings.local.json
+/.claude/scheduled_tasks.lock
+/*.gem

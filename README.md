@@ -174,6 +174,12 @@ bin/rails active_analytics:purge     # delete recordings and visitor rows older 
 
 Run both on a schedule (cron / solid_queue recurring / whenever).
 
+## Troubleshooting
+
+| Symptom | Cause / fix |
+|---|---|
+| Blank replay / "No pages recorded" on older recordings | Caused by the 64KB `fetch keepalive` / `sendBeacon` body cap silently dropping the (large) initial DOM snapshot batch. Fixed by the recorder's flush-transport rules (plain `fetch` without keepalive for periodic flushes, snapshot flushed immediately, one retry on rejection). Recordings created before the fix that never received a snapshot cannot be repaired retroactively. |
+
 ## Development
 
 ```bash

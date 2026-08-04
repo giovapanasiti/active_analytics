@@ -1,0 +1,20 @@
+<h1>Big Page</h1>
+
+<p>This page exists to reproduce the 64KB keepalive/sendBeacon body cap bug: it
+renders enough DOM (600 paragraphs) that the serialized <code>snapshot</code>
+event on the recorder's first flush is well over 64KB. Before the flush-transport
+fix, that snapshot batch was silently dropped by the browser and the replay for
+this session would show a blank stage with no pages recorded.</p>
+
+<p><%= link_to "Back to demo home", root_path %></p>
+
+<% 600.times do |i| %>
+  <p>
+    Paragraph <%= i %>: Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+    Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+    minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+    commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit
+    esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat
+    non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+  </p>
+<% end %>

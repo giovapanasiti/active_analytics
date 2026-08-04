@@ -1,7 +1,12 @@
 <h1 class="aa-page-title">Heatmaps</h1>
 
 <% if @pages.empty? %>
-  <p class="aa-empty">No heatmap data has been aggregated yet.</p>
+  <p class="aa-empty">
+    No heatmap data has been aggregated yet. Heatmaps are built when sessions are
+    analyzed &mdash; open a recording and click &quot;Run analysis&quot;, or run
+    <code>bin/rails active_analytics:analyze</code>. Sessions are analyzed automatically
+    once they have been inactive for the configured session_timeout.
+  </p>
 <% else %>
   <table class="aa-table">
     <thead>
