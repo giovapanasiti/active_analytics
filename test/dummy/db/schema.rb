@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_03_000009) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_05_000001) do
   create_table "active_analytics_browser_days", force: :cascade do |t|
     t.string "browser", null: false
     t.date "date", null: false
@@ -70,6 +70,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_03_000009) do
     t.integer "frustration_score"
     t.datetime "heatmap_aggregated_at"
     t.datetime "last_seen_at", null: false
+    t.text "page_paths"
     t.integer "pages_count", default: 1
     t.string "referrer"
     t.datetime "started_at", null: false

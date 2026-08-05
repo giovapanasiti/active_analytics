@@ -85,12 +85,31 @@ module ActiveAnalytics
     # path match gets expensive, and an old snapshot is a worse backdrop anyway.
     REFERENCE_SCAN_LIMIT = 200
 
+    # A recording's page_paths (populated by HeatmapAggregator) lists every page
+    # visited during the session, so interior pages reached via in-session
+    # navigation (not just session entry points) can serve as the backdrop.
+    # Recordings analyzed before the page_paths migration fall back to matching
+    # first_url only.
     def find_reference_recording
-      match = Recording.where(device: @device).order(started_at: :desc).limit(REFERENCE_SCAN_LIMIT)
-        .find { |recording| HeatmapAggregator.page_path(recording.first_url) == @path }
-      return match if match
+      by_page_paths(device: @device) ||
+        by_page_paths(device: nil) ||
+        by_first_url(device: @device) ||
+        by_first_url(device: nil)
+    end
 
-      Recording.order(started_at: :desc).limit(REFERENCE_SCAN_LIMIT)
+    def by_page_paths(device:)
+      like_needle = ActiveRecord::Base.sanitize_sql_like(%("#{@path}"))
+
+      scope = Recording.where("page_paths LIKE ?", "%#{like_needle}%")
+      scope = scope.where(device: device) if device
+      scope.order(started_at: :desc).limit(REFERENCE_SCAN_LIMIT)
+        .find { |recording| recording.page_paths&.include?(@path) }
+    end
+
+    def by_first_url(device:)
+      scope = Recording.all
+      scope = scope.where(device: device) if device
+      scope.order(started_at: :desc).limit(REFERENCE_SCAN_LIMIT)
         .find { |recording| HeatmapAggregator.page_path(recording.first_url) == @path }
     end
   end

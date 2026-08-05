@@ -88,6 +88,28 @@ module ActiveAnalytics
       assert_includes response.body, newest.uuid
     end
 
+    test "show resolves an interior page via page_paths even when first_url points elsewhere" do
+      recording = build_recording(uuid: SecureRandom.uuid, first_url: "http://example.com/", device: "desktop")
+      recording.update!(page_paths: [ "/", "/dashboard" ])
+      bump_scroll(path: "/dashboard", device: "desktop", y_bucket: 2, count: 1)
+
+      get "/analytics/heatmaps/show", params: { path: "/dashboard", device: "desktop" }
+
+      assert_response :success
+      assert_includes response.body, "Backdrop from recording #{recording.uuid}"
+      assert_not_includes response.body, "No snapshot available"
+    end
+
+    test "show falls back to first_url matching when page_paths is nil (pre-migration recordings)" do
+      recording = build_recording(uuid: SecureRandom.uuid, first_url: "http://example.com/legacy", device: "desktop")
+      bump_scroll(path: "/legacy", device: "desktop", y_bucket: 2, count: 1)
+
+      get "/analytics/heatmaps/show", params: { path: "/legacy", device: "desktop" }
+
+      assert_response :success
+      assert_includes response.body, "Backdrop from recording #{recording.uuid}"
+    end
+
     test "show falls back to move for an invalid kind" do
       bump_move(path: "/pricing", device: "desktop", x_bucket: 2, y_bucket: 2, count: 4)
 

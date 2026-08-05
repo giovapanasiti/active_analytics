@@ -195,6 +195,20 @@ module ActiveAnalytics
       assert_equal 1, clicked.count
     end
 
+    # --- page_paths tracking ----------------------------------------------------
+
+    test "aggregate! records the ordered unique list of visited paths on the recording" do
+      recording = build_recording(first_url: "https://example.com/")
+      record_events(recording, [
+        nav(0, url: "https://example.com/dashboard"),
+        snapshot(50, url: "https://example.com/dashboard", vw: 1000, vh: 800)
+      ])
+
+      HeatmapAggregator.new(recording).aggregate!
+
+      assert_equal [ "/", "/dashboard" ], recording.reload.page_paths
+    end
+
     # --- URL normalization -----------------------------------------------------
 
     test "page_path normalizes URLs to a path" do

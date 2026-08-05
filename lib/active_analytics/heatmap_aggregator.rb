@@ -27,6 +27,7 @@ module ActiveAnalytics
 
       HeatmapCell.bump!(cell_rows)
 
+      recording.page_paths = @visited_paths
       recording.heatmap_aggregated_at = Time.current
       recording.save!
 
@@ -53,6 +54,7 @@ module ActiveAnalytics
 
     def reset_state!
       @path = self.class.page_path(recording.first_url)
+      @visited_paths = [ @path ]
       @device = recording.device.presence || "desktop"
       @vw = numeric(recording.viewport_width).to_i
       @vh = numeric(recording.viewport_height).to_i
@@ -95,6 +97,7 @@ module ActiveAnalytics
 
       if @last_nav_t && (t - @last_nav_t) <= PAGEVIEW_FOLLOWUP_WINDOW_MS
         @path = new_path
+        visit!(new_path)
         @scroll_x = 0
         @scroll_y = 0
         @max_depth = @vh
@@ -145,9 +148,14 @@ module ActiveAnalytics
     def transition_to(new_path)
       flush_pageview!
       @path = new_path
+      visit!(new_path)
       @scroll_x = 0
       @scroll_y = 0
       @max_depth = @vh
+    end
+
+    def visit!(path)
+      @visited_paths << path unless @visited_paths.include?(path)
     end
 
     # Closes out the current pageview with a single scroll-depth cell bump.

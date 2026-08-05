@@ -2,6 +2,8 @@ module ActiveAnalytics
   class Recording < ApplicationRecord
     UUID_REGEX = /\A[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\z/
 
+    attribute :page_paths, :json
+
     has_many :event_batches, -> { order(:seq) }, dependent: :delete_all
     has_many :insights, dependent: :delete_all
 
