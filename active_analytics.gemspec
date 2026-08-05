@@ -5,7 +5,7 @@ Gem::Specification.new do |spec|
   spec.version     = ActiveAnalytics::VERSION
   spec.authors     = [ "Giovanni Panasiti" ]
   spec.email       = [ "giova.panasiti@gmail.com" ]
-  spec.homepage    = "https://github.com/gpanasiti/active_analytics"
+  spec.homepage    = "https://github.com/giovapanasiti/active_analytics"
   spec.summary     = "Self-hosted session recording and behavior analytics engine for Rails (Hotjar alternative)"
   spec.description = "Records user sessions, replays them in a built-in dashboard, and surfaces AI-assisted " \
                       "behavior insights, all self-hosted inside your Rails app."

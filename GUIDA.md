@@ -22,19 +22,19 @@ gem "active_analytics"
 
 ```ruby
 # Gemfile
-gem "active_analytics", github: "gpanasiti/active_analytics"
+gem "active_analytics", github: "giovapanasiti/active_analytics"
 
 # Per bloccare una versione precisa, aggiungi branch, tag o commit:
-# gem "active_analytics", github: "gpanasiti/active_analytics", branch: "main"
-# gem "active_analytics", github: "gpanasiti/active_analytics", tag: "v0.1.0"
-# gem "active_analytics", github: "gpanasiti/active_analytics", ref: "abc1234"
+# gem "active_analytics", github: "giovapanasiti/active_analytics", branch: "main"
+# gem "active_analytics", github: "giovapanasiti/active_analytics", tag: "v0.1.0"
+# gem "active_analytics", github: "giovapanasiti/active_analytics", ref: "abc1234"
 ```
 
 Se il repository è privato, configura prima le credenziali per Bundler
 (`bundle config github.com TUO_TOKEN`) oppure usa l'URL SSH:
 
 ```ruby
-gem "active_analytics", git: "git@github.com:gpanasiti/active_analytics.git"
+gem "active_analytics", git: "git@github.com:giovapanasiti/active_analytics.git"
 ```
 
 Per lo sviluppo in locale puoi puntare direttamente alla cartella del progetto:

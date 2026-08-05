@@ -31,7 +31,7 @@ Add the gem:
 gem "active_analytics"
 
 # ...or straight from GitHub:
-gem "active_analytics", github: "gpanasiti/active_analytics"
+gem "active_analytics", github: "giovapanasiti/active_analytics"
 ```
 
 Install and migrate:
